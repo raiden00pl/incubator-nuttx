@@ -43,10 +43,12 @@ MAKE=make
 unset testfile
 unset HOPTION
 unset JOPTION
+PRINTLISTONLY=0
+GITCLEAN=0
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [-si|-sl>] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
@@ -57,6 +59,13 @@ function showusage {
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
+  echo "  -p only print the list of configs without running any builds"
+  echo "  -G Use \"git clean -xfdq\" instead of \"make distclean\" to clean the tree."
+  echo "     This option may speed up the builds. However, note that:"
+  echo "       * This assumes that your trees are git based."
+  echo "       * This assumes that only nuttx and apps repos need to be cleaned."
+  echo "       * If the tree has files not managed by git, they will be removed"
+  echo "         as well."
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -91,6 +100,12 @@ while [ ! -z "$1" ]; do
   -t )
     shift
     nuttx="$1"
+    ;;
+  -p )
+    PRINTLISTONLY=1
+    ;;
+  -G )
+    GITCLEAN=1
     ;;
   -h )
     showusage
@@ -131,7 +146,7 @@ fi
 
 export APPSDIR
 
-testlist=`grep -v "^-" $testfile || true`
+testlist=`grep -v -E "^(-|#)" $testfile || true`
 blacklist=`grep "^-" $testfile || true`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
@@ -146,10 +161,19 @@ function makefunc {
 
 # Clean up after the last build
 
+function distclean_with_git {
+  git -C $nuttx clean -xfdq
+  git -C $APPSDIR clean -xfdq
+}
+
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+    if [ ${GITCLEAN} -eq 1 ]; then
+      distclean_with_git
+    else
+      makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+    fi
   fi
 }
 
@@ -198,11 +222,14 @@ function build {
 function dotest {
   echo "===================================================================================="
   config=`echo $1 | cut -d',' -f1`
-  re=\\b${config/\//:}\\b
-  if [[ $blacklist =~ $re ]]; then
+  re="-${config/\//:}[[:space:]]"
+  if [[ "${blacklist} " =~ $re ]]; then
     echo "Skipping: $1"
   else
     echo "Configuration/Tool: $1"
+    if [ ${PRINTLISTONLY} -eq 1 ]; then
+      return
+    fi
 
     # Parse the next line
 
@@ -259,7 +286,7 @@ for line in $testlist; do
     for i in ${list}; do
       dotest $i${line/$dir/}
     done
-  elif [ "X$firstch" != "X#" ]; then
+  else
     dotest $line
   fi
 done

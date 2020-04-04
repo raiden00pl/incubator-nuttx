@@ -57,7 +57,8 @@
 
 /* These file systems require MTD drivers */
 
-#if defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)
+#if (defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)) && \
+    defined(CONFIG_MTD)
 #  define MDFS_SUPPORT 1
 #endif
 
@@ -339,7 +340,12 @@ int mount(FAR const char *source, FAR const char *target,
       goto errout;
     }
 
-  inode_semtake();
+  ret = inode_semtake();
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_inode;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
@@ -494,12 +500,10 @@ errout_with_semaphore:
   RELEASE_SEARCH(&desc);
 #endif
 
-#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
 errout_with_inode:
 
-#ifdef NODFS_SUPPORT
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
   if (drvr_inode != NULL)
-#endif
     {
       inode_release(drvr_inode);
     }
