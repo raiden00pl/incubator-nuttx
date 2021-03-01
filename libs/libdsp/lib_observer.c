@@ -107,6 +107,10 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
 
   smo->k_slide = kslide;
   smo->err_max = err_max;
+
+  /* Store inverted err_max to avoid division */
+
+  smo->one_by_err_max = (1.0f/err_max);
 }
 
 /****************************************************************************
@@ -159,7 +163,8 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
  *   i_ab   - (in) inverter alpha-beta current
  *   v_ab   - (in) inverter alpha-beta voltage
  *   phy    - (in) pointer to the motor physical parameters
- *   dir    - (in) rotation direction (1.0 for CW, -1.0 for CCW)
+ *   dir    - (in) rotation direction (1.0 for CCW, -1.0 for CW)
+ *            NOTE: (mechanical dir) = -(electrical dir)
  *
  * Returned Value:
  *   None
@@ -189,7 +194,9 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
   float angle        = 0.0f;
   float filter       = 0.0f;
 
-  /* REVISIT: observer works only when IQ current is high enough */
+  /* REVISIT: observer works only when IQ current is high enough
+   * Lower IQ current -> lower K_SLIDE
+   */
 
   /* Calculate observer gains */
 
@@ -289,7 +296,7 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
     {
       /* Enter linear region if error is small enough */
 
-      z->a = i_err->a * smo->k_slide / smo->err_max;
+      z->a = i_err->a * smo->k_slide * smo->one_by_err_max;
     }
   else
     {
@@ -302,7 +309,7 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
     {
       /* Enter linear region if error is small enough */
 
-      z->b = i_err->b * smo->k_slide / smo->err_max;
+      z->b = i_err->b * smo->k_slide * smo->one_by_err_max;
     }
   else
     {
@@ -325,6 +332,8 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
    *   emf_a = -|emf| * sin(th)
    *   emf_b =  |emf| * cos(th)
    *   th = atan2(-emf_a, emf->b)
+   *
+   * NOTE: bottleneck but we can't do much more to optimise this
    */
 
   angle = fast_atan2(-emf->a, emf->b);
@@ -332,6 +341,8 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
 #if 1
   /* Some assertions
    * TODO: simplify
+   *
+   * This will not work if fast-math is enabled !
    */
 
   if (angle != angle) angle = 0.0f;
@@ -398,7 +409,7 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
 
   so->filter  = filter;
 
-  /*  */
+  /* Store inverted sampling period */
 
   so->one_by_dt = 1.0f / (so->samples * per);
 }
