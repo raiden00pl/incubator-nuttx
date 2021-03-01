@@ -128,6 +128,12 @@ void up_idle(void)
 
   up_timer_update();
 #endif
+
+#ifdef CONFIG_SIM_DRIVERS_FOC
+  /* Update FOC motor simulation */
+
+  sim_foc_update();
+#endif
 }
 #endif /* !CONFIG_SMP */
 

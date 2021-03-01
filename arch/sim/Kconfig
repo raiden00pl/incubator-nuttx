@@ -610,4 +610,11 @@ config SIM_UART3_NAME
 	default "/dev/ttySIM3"
 	depends on SIM_UART_NUMBER >= 4
 
+config SIM_DRIVERS_FOC
+	bool "Simulated FOC device"
+	default n
+	depends on DRIVERS_FOC
+	---help---
+		Build a simulated lower-half FOC device
+
 endif # ARCH_SIM
