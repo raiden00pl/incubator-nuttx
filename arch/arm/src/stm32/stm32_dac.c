@@ -81,7 +81,9 @@
  */
 
 #if STM32_NDAC < 3
-#  warning
+#  ifdef CONFIG_STM32_DAC2CH1
+#    error DAC2CH1 not supported by chip
+#  endif
 #  undef CONFIG_STM32_DAC2CH1
 #  undef CONFIG_STM32_DAC2CH1_DMA
 #  undef CONFIG_STM32_DAC2CH1_TIMER
@@ -89,7 +91,9 @@
 #endif
 
 #if STM32_NDAC < 2
-#  warning
+#  ifdef CONFIG_STM32_DAC1CH2
+#    error DAC1CH2 not supported by chip
+#  endif
 #  undef CONFIG_STM32_DAC1CH2
 #  undef CONFIG_STM32_DAC1CH2_DMA
 #  undef CONFIG_STM32_DAC1CH2_TIMER
@@ -97,7 +101,9 @@
 #endif
 
 #if STM32_NDAC < 1
-#  warning
+#  ifdef CONFIG_STM32_DAC1CH1
+#    error DAC1CH1 not supported by chip
+#  endif
 #  undef CONFIG_STM32_DAC1CH1
 #  undef CONFIG_STM32_DAC1CH1_DMA
 #  undef CONFIG_STM32_DAC1CH1_TIMER
@@ -756,6 +762,8 @@ static struct dac_dev_s g_dac2ch1dev =
 };
 #endif /* CONFIG_STM32_DAC2CH1 */
 #endif /* CONFIG_STM32_DAC2 */
+
+/* REVISIT: there can be more than one DAC blocks! */
 
 static struct stm32_dac_s g_dacblock;
 
