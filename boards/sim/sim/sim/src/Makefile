@@ -69,4 +69,8 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
   CSRCS += sim_buttons.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_FOC),y)
+CSRCS += sim_foc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
