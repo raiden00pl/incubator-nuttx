@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/power/power_ioctl.h
- * NuttX Power-Related IOCTLs definitions
+ * drivers/power/focmodel/fixed16_model/focmodel_fixed16.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,38 +18,23 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
-#define __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
+#ifndef __DRIVERS_POWER_FOCMODEL_FOCMODEL_FIXED16_H
+#define __DRIVERS_POWER_FOCMODEL_FOCMODEL_FIXED16_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+
+#include <nuttx/power/focmodel/focmodel_typespec.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/* All power-related IOCTL commands must be defined in this header file
- * in order to assure that every IOCTL command is unique and will not be
- * aliased.
- */
+/* FOC model driver fixed16 specific logic */
 
-#define PWRIOC_START          _PWRIOC(1)
-#define PWRIOC_STOP           _PWRIOC(2)
-#define PWRIOC_SET_MODE       _PWRIOC(3)
-#define PWRIOC_SET_LIMITS     _PWRIOC(4)
-#define PWRIOC_GET_STATE      _PWRIOC(5)
-#define PWRIOC_SET_STATE      _PWRIOC(6)
-#define PWRIOC_GET_FAULT      _PWRIOC(7)
-#define PWRIOC_SET_FAULT      _PWRIOC(8)
-#define PWRIOC_CLEAN_FAULT    _PWRIOC(9)
-#define PWRIOC_SET_PARAMS     _PWRIOC(10)
-#define PWRIOC_GET_PARAMS     _PWRIOC(11)
-#define PWRIOC_SET_CONFIG     _PWRIOC(12)
-#define PWRIOC_GET_CONFIG     _PWRIOC(13)
-#define PWRIOC_GET_INFO       _PWRIOC(14)
+extern struct focmodel_typespec_s g_focmodel_typespec_b16;
 
-#endif /* __INCLUDE_NUTTX_POWER_POWER_IOCTL_H */
+#endif /* __DRIVERS_POWER_FOCMODEL_FOCMODEL_FIXED16_H */

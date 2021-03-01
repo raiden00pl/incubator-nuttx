@@ -1,0 +1,28 @@
+menuconfig POWER_FOCMODEL
+  bool "FOC model driver support"
+  default n
+  depends on POWER_FOC
+  ---help---
+         Enables FOC driver model support.
+
+if POWER_FOCMODEL
+
+config POWER_FOCMODEL_PMSM
+       bool "FOC PMSM model support"
+       default y
+
+if POWER_FOCMODEL_PMSM
+
+config POWER_FOCMODEL_PMSM_FLOAT
+       bool
+       default y if POWER_FOC_USE_FLOAT
+       default n
+
+config POWER_FOCMODEL_PMSM_FIXED16
+       bool
+       default y if POWER_FOC_USE_FIXED16
+       default n
+
+endif # POWER_FOCMODEL_PMSM
+
+endif #POWER_FOCMODEL

@@ -334,7 +334,7 @@ config SMPS_HAVE_EFFICIENCY
 
 endif
 
-config DRIVERS_MOTOR
+menuconfig DRIVERS_MOTOR
 	bool "Motor driver"
 	default n
 	---help---
@@ -382,7 +382,10 @@ config MOTOR_HAVE_INPUT_POWER
 	bool "Have input power protection"
 	default n
 
-endif
+endif #DRIVERS_MOTOR
+
+source "drivers/power/foc/Kconfig"
+source "drivers/power/focmodel/Kconfig"
 
 menuconfig POWER
 	bool "Power Management Support"

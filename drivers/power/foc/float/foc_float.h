@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/power/power_ioctl.h
- * NuttX Power-Related IOCTLs definitions
+ * drivers/power/foc/float/foc_float.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,38 +18,25 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
-#define __INCLUDE_NUTTX_POWER_POWER_IOCTL_H
+#ifndef __DRIVERS_POWER_FOC_FOC_FLOAT_H
+#define __DRIVERS_POWER_FOC_FOC_FLOAT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+
+#include <nuttx/power/foc/foc_typespec.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/* All power-related IOCTL commands must be defined in this header file
- * in order to assure that every IOCTL command is unique and will not be
- * aliased.
- */
+/****************************************************************************
+ * Name: foc_typespec_f32_init
+ ****************************************************************************/
 
-#define PWRIOC_START          _PWRIOC(1)
-#define PWRIOC_STOP           _PWRIOC(2)
-#define PWRIOC_SET_MODE       _PWRIOC(3)
-#define PWRIOC_SET_LIMITS     _PWRIOC(4)
-#define PWRIOC_GET_STATE      _PWRIOC(5)
-#define PWRIOC_SET_STATE      _PWRIOC(6)
-#define PWRIOC_GET_FAULT      _PWRIOC(7)
-#define PWRIOC_SET_FAULT      _PWRIOC(8)
-#define PWRIOC_CLEAN_FAULT    _PWRIOC(9)
-#define PWRIOC_SET_PARAMS     _PWRIOC(10)
-#define PWRIOC_GET_PARAMS     _PWRIOC(11)
-#define PWRIOC_SET_CONFIG     _PWRIOC(12)
-#define PWRIOC_GET_CONFIG     _PWRIOC(13)
-#define PWRIOC_GET_INFO       _PWRIOC(14)
+int foc_typespec_f32_init(FAR struct foc_dev_s *dev);
 
-#endif /* __INCLUDE_NUTTX_POWER_POWER_IOCTL_H */
+#endif /* __DRIVERS_POWER_FOC_FOC_FLOAT_H */
