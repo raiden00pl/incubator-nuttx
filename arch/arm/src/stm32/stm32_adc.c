@@ -148,6 +148,16 @@
 
 /* ADC Channels/DMA *********************************************************/
 
+#define ADC_MAX_SAMPLES (16)
+
+/* The logic below is not always true.
+ * The maximum number of ADC channels depends on more variables than only DMA support
+ * For now it is disabled and we just support maxiumum number of samples.
+ * Probably we should configure this from kconfig.
+ */
+
+#if 0
+
 /* The maximum number of channels that can be sampled.  If DMA support is
  * not enabled, then only a single channel can be sampled.  Otherwise,
  * data overruns would occur.
@@ -167,6 +177,8 @@
 #    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #  endif
 #endif
+
+#endif  /* #if 0 */
 
 /* DMA values differs according to STM32 DMA IP core version */
 
