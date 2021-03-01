@@ -1283,6 +1283,7 @@ config STM32_STM32L15XX
 	bool
 	default n
 	select ARCH_CORTEXM3
+	select STM32_HAVE_ADC1
 	select STM32_ENERGYLITE
 	select STM32_HAVE_USBDEV
 	select STM32_HAVE_DAC1
@@ -1312,6 +1313,7 @@ config STM32_STM32F10XX
 	bool
 	default n
 	select ARCH_CORTEXM3
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_RTC_COUNTER
@@ -1434,6 +1436,7 @@ config STM32_STM32F20XX
 	bool
 	default n
 	select ARCH_CORTEXM3
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_FLASH_ICACHE
 	select STM32_HAVE_FLASH_DCACHE
 	select STM32_HAVE_CRYP
@@ -1487,6 +1490,7 @@ config STM32_STM32F30XX
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
@@ -1526,6 +1530,7 @@ config STM32_STM32F33XX
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_HRTIM1
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
@@ -1556,6 +1561,7 @@ config STM32_STM32F37XX
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_USBDEV
 	select STM32_HAVE_TIM3
 	select STM32_HAVE_TIM4
@@ -1586,6 +1592,7 @@ config STM32_STM32F4XXX
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_ADC1
 	select STM32_HAVE_FLASH_ICACHE
 	select STM32_HAVE_FLASH_DCACHE
 	select STM32_HAVE_CRYP
@@ -1678,7 +1685,6 @@ config STM32_STM32F412
 	select STM32_HAVE_SPI1
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
-	select STM32_HAVE_ADC1
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_I2SPLL
 
@@ -1922,6 +1928,7 @@ config STM32_STM32F469
 config STM32_STM32G4XXX
 	bool
 	default n
+	select STM32_HAVE_ADC1
 
 config STM32_STM32G4XXK
 	bool
@@ -2322,6 +2329,10 @@ config STM32_HAVE_TIM20
 	default n
 
 config STM32_HAVE_TSC
+	bool
+	default n
+
+config STM32_HAVE_ADC1
 	bool
 	default n
 
