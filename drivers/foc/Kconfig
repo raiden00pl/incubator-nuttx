@@ -1,0 +1,36 @@
+menuconfig DRIVERS_FOC
+  bool "FOC (Field Oriented Controller) driver support"
+  select LIBDSP
+  default n
+  ---help---
+    Enables building of the "upper-half" FOC driver.
+
+if DRIVERS_FOC
+
+# Support for different computations options
+# We support float32 and fixed16 numeric types for now
+
+config DRIVERS_FOC_INST
+       int "FOC instances"
+       default 1
+
+config DRIVERS_FOC_PHASES
+       int "FOC phases number"
+       default 3
+
+config DRIVERS_FOC_SHUNTS
+       int "FOC number of shunts"
+       range 1 3
+       default 3
+       ---help---
+         Number of shunt supported (or other types of current sensors).
+         Note that the upper-half logic always expect a current in a 3-phase format.
+         Any current recontruction must be done on the lower-half side.
+
+config DRIVERS_FOC_TRACE
+       bool "FOC trace support"
+       default n
+       ---help---
+         Enables FOC driver trace interface. 
+
+endif #DRIVERS_FOC
