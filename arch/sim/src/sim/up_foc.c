@@ -64,8 +64,10 @@
   SIM_FOCMODEL_DATA(d).cb->start(&SIM_FOCMODEL_DEV(d))
 #  define SIM_FOCMODEL_CB_FREQ(d, f)                                     \
   SIM_FOCMODEL_DATA(d).cb->freq(&SIM_FOCMODEL_DEV(d), f)
-#  define SIM_FOCMODEL_CB_CURR(d, c, v)                                  \
-  SIM_FOCMODEL_DATA(d).cb->current(&SIM_FOCMODEL_DEV(d), c, v)
+#  define SIM_FOCMODEL_CB_VAB(d, v)                                      \
+  SIM_FOCMODEL_DATA(d).cb->vab(&SIM_FOCMODEL_DEV(d), v)
+#  define SIM_FOCMODEL_CB_CURR(d, c)                                     \
+  SIM_FOCMODEL_DATA(d).cb->current(&SIM_FOCMODEL_DEV(d), c)
 #  define SIM_FOCMODEL_CB_DUTY(d, x, y)                                  \
   SIM_FOCMODEL_DATA(d).cb->duty(&SIM_FOCMODEL_DEV(d), x, y)
 #endif  /* CONFIG_POWER_FOCMODEL */
@@ -256,12 +258,6 @@ static int sim_foc_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
 
   sim->pwm_freq = freq;
 
-#ifdef CONFIG_POWER_FOCMODEL
-  /* Configure model frequency */
-
-  SIM_FOCMODEL_CB_FREQ(dev, freq);
-#endif
-
   return OK;
 }
 
@@ -403,6 +399,12 @@ static int sim_foc_work_cfg(FAR struct foc_dev_s *dev, uint32_t freq)
 
   sim->work_freq = freq;
   sim->work_div  = 1;
+
+#ifdef CONFIG_POWER_FOCMODEL
+  /* Configure the model sampling frequency */
+
+  SIM_FOCMODEL_CB_FREQ(dev, freq);
+#endif
 
 errout:
   return ret;
@@ -599,9 +601,13 @@ static void sim_foc_work(FAR struct foc_dev_s *dev)
   if (sim->worker_cntr % sim->work_div == 0)
     {
 #ifdef CONFIG_POWER_FOCMODEL
-      /* Get currents from model */
+      /* Feed model with alpha-beta voltage */
 
-      SIM_FOCMODEL_CB_CURR(dev, sim->current, &dev->state.fb.vab);
+      SIM_FOCMODEL_CB_VAB(dev, &dev->state.fb.vab);
+
+      /* Get phase currents from the model */
+
+      SIM_FOCMODEL_CB_CURR(dev, sim->current);
 #endif
 
       /* Call FOC work */
