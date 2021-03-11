@@ -457,6 +457,8 @@ static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
                           uint32_t ccr);
 static int pwm_arr_update(FAR struct pwm_lowerhalf_s *dev, uint32_t arr);
 static uint32_t pwm_arr_get(FAR struct pwm_lowerhalf_s *dev);
+static int pwm_rep_update(FAR struct pwm_lowerhalf_s *dev, uint32_t rep);
+static uint32_t pwm_rep_get(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty);
 static int pwm_timer_enable(FAR struct pwm_lowerhalf_s *dev, bool state);
@@ -465,7 +467,7 @@ static int pwm_timer_enable(FAR struct pwm_lowerhalf_s *dev, bool state);
 static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv);
 #endif
 #ifdef HAVE_TRGO
-static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv,
+static int pwm_trgo_configure(FAR struct pwm_lowerhalf_s *dev,
                               uint8_t trgo);
 #endif
 #if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
@@ -543,6 +545,11 @@ static const struct stm32_pwm_ops_s g_llpwmops =
   .ccr_get         = pwm_ccr_get,
   .arr_update      = pwm_arr_update,
   .arr_get         = pwm_arr_get,
+  .rep_update      = pwm_rep_update,
+  .rep_get         = pwm_rep_get,
+#ifdef HAVE_TRGO
+  .trgo_set        = pwm_trgo_configure,
+#endif
   .outputs_enable  = pwm_outputs_enable,
   .soft_update     = pwm_soft_update,
   .freq_update     = pwm_frequency_update,
@@ -2264,6 +2271,32 @@ static uint32_t pwm_arr_get(FAR struct pwm_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: pwm_rep_update
+ ****************************************************************************/
+
+static int pwm_rep_update(FAR struct pwm_lowerhalf_s *dev, uint32_t rep)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  /* Update RCR register */
+
+  pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, rep);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pwm_rep_get
+ ****************************************************************************/
+
+static uint32_t pwm_rep_get(FAR struct pwm_lowerhalf_s *dev)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  return pwm_getreg(priv, STM32_ATIM_RCR_OFFSET);
+}
+
+/****************************************************************************
  * Name: pwm_duty_update
  *
  * Description:
@@ -3010,16 +3043,17 @@ errout:
 
 #ifdef HAVE_TRGO
 /****************************************************************************
- * Name: pwm_sync_configure
+ * Name: pwm_trgo_configure
  *
  * Description:
  *   Confiugre an output synchronisation event for PWM timer (TRGO/TRGO2)
  *
  ****************************************************************************/
 
-static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv,
+static int pwm_trgo_configure(FAR struct pwm_lowerhalf_s *dev,
                               uint8_t trgo)
 {
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   uint32_t cr2 = 0;
 
   /* Configure TRGO (4 LSB in trgo) */
@@ -3281,7 +3315,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 #ifdef HAVE_TRGO
   /* Configure TRGO/TRGO2 */
 
-  ret = pwm_sync_configure(priv, priv->trgo);
+  ret = pwm_trgo_configure(dev, priv->trgo);
   if (ret < 0)
     {
       goto errout;
@@ -3522,7 +3556,7 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 #ifdef HAVE_TRGO
       /* Configure TRGO/TRGO2 */
 
-      ret = pwm_sync_configure(priv, priv->trgo);
+      ret = pwm_trgo_configure(dev, priv->trgo);
       if (ret < 0)
         {
           goto errout;
