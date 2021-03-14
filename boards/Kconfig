@@ -844,6 +844,14 @@ config ARCH_BOARD_OLIMEX_STRP711
 		further information.  STATUS: Configurations for the basic OS test and NSH
 		are complete and verified.
 
+config ARCH_BOARD_ODRIVE
+	bool "Odrive board"
+	depends on ARCH_CHIP_STM32F405RG
+	---help---
+		This port uses the ODrive board. This is an open-source dual-motor
+		FOC controller based on the STMicro STM32F405RG and TI DRV8301 gate drivers.
+		See https://odriverobotics.com/ for further information.
+
 config ARCH_BOARD_OLIMEX_STM32H405
 	bool "Olimex STM32 H405 board"
 	depends on ARCH_CHIP_STM32F405RG
@@ -2358,6 +2366,7 @@ config ARCH_BOARD
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-stm32-p407"        if ARCH_BOARD_OLIMEX_STM32P407
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
+	default "odrive"                   if ARCH_BOARD_ODRIVE
 	default "olimexino-stm32"          if ARCH_BOARD_OLIMEXINO_STM32
 	default "omnibusf4"                if ARCH_BOARD_OMNIBUSF4
 	default "open1788"                 if ARCH_BOARD_OPEN1788
@@ -2896,6 +2905,9 @@ source "boards/arm/stm32/nucleo-f429zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L152RE
 source "boards/arm/stm32/nucleo-l152re/Kconfig"
+endif
+if ARCH_BOARD_ODRIVE
+source "boards/arm/stm32/odrive/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32E407
 source "boards/arm/stm32/olimex-stm32-e407/Kconfig"
