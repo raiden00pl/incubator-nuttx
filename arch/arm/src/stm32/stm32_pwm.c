@@ -405,6 +405,7 @@ struct stm32_pwmtimer_s
                                          */
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
+  bool     have_pulsecount;             /* Timer supports pulse count */
   uint8_t  irq;                         /* Timer update IRQ */
   uint8_t  prev;                        /* The previous value of the RCR (pre-loaded) */
   uint8_t  curr;                        /* The current value of the RCR (pre-loaded) */
@@ -508,13 +509,12 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info,
-                     FAR void *handle);
-#else
+static int pwm_start_pulsecount(FAR struct pwm_lowerhalf_s *dev,
+                                FAR const struct pwm_info_s *info,
+                                FAR void *handle);
+#endif
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info);
-#endif
 
 static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
@@ -532,7 +532,11 @@ static const struct pwm_ops_s g_pwmops =
 {
   .setup       = pwm_setup,
   .shutdown    = pwm_shutdown,
+#ifdef CONFIG_PWM_PULSECOUNT
+  .start       = pwm_start_pulsecount,
+#else
   .start       = pwm_start,
+#endif
   .stop        = pwm_stop,
   .ioctl       = pwm_ioctl,
 };
@@ -724,6 +728,7 @@ static struct stm32_pwmtimer_s g_pwm1dev =
   .trgo        = STM32_TIM1_TRGO,
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
+  .have_pulsecount = true,
   .irq         = STM32_IRQ_TIM1UP,
 #endif
   .base        = STM32_TIM1_BASE,
@@ -1707,6 +1712,7 @@ static struct stm32_pwmtimer_s g_pwm15dev =
   .trgo        = STM32_TIM15_TRGO,
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
+  .have_pulsecount = true,
   .irq         = STM32_IRQ_TIM15,
 #endif
   .base        = STM32_TIM15_BASE,
@@ -1776,6 +1782,7 @@ static struct stm32_pwmtimer_s g_pwm16dev =
   .trgo        = 0,             /* TRGO not supported for TIM16 */
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
+  .have_pulsecount = true,
   .irq         = STM32_IRQ_TIM16,
 #endif
   .base        = STM32_TIM16_BASE,
@@ -1845,6 +1852,7 @@ static struct stm32_pwmtimer_s g_pwm17dev =
   .trgo        = 0,             /* TRGO not supported for TIM17 */
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
+  .have_pulsecount = true,
   .irq         = STM32_IRQ_TIM17,
 #endif
   .base        = STM32_TIM17_BASE,
@@ -4229,10 +4237,16 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
    */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  ret = pwm_pulsecount_configure(dev);
-#else
-  ret = pwm_configure(dev);
+  if (priv->have_pulsecount == true)
+    {
+      ret = pwm_pulsecount_configure(dev);
+    }
+  else
 #endif
+    {
+      ret = pwm_configure(dev);
+    }
+
   if (ret < 0)
     {
       pwmerr("failed to configure PWM %d\n", priv->timid);
@@ -4330,11 +4344,18 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info,
-                     FAR void *handle)
+static int pwm_start_pulsecount(FAR struct pwm_lowerhalf_s *dev,
+                                FAR const struct pwm_info_s *info,
+                                FAR void *handle)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  /* Start timer without pulse count support*/
+
+  if (priv->have_pulsecount == false)
+    {
+      return pwm_start(dev, info);
+    }
 
   /* Check if a pulsecount has been selected */
 
@@ -4360,7 +4381,8 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   return pwm_pulsecount_timer(dev, info);
 }
-#else  /* !CONFIG_PWM_PULSECOUNT */
+#endif /* CONFIG_PWM_PULSECOUNT */
+
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
@@ -4402,7 +4424,6 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   return ret;
 }
-#endif /* CONFIG_PWM_PULSECOUNT */
 
 /****************************************************************************
  * Name: pwm_stop
