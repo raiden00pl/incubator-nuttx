@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-devkitc/src/esp32_spi.c
+ * boards/arm/imxrt/imxrt1064-evk/src/imxrt_lcd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,44 +24,70 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
+#include "imxrt_lcd.h"
+#include "imxrt_gpio.h"
+
+#include "imxrt1064-evk.h"
+
 #include <arch/board/board.h>
 
-#include "esp32-devkitc.h"
+#ifdef CONFIG_IMXRT_LCD
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_spi2_status
+ * Name: imxrt_lcd_bkl_pin_setup
+ *
+ * Description:
+ *   Setup backlight pin (initially off)
+ *
  ****************************************************************************/
 
-uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+void imxrt_lcd_pkl_pin_setup(void)
 {
-  uint8_t status = 0;
-
-#ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
-#endif
-
-  return status;
+  imxrt_config_gpio(GPIO_LCD_BL);
 }
 
 /****************************************************************************
- * Name:  esp32_spi3_status
+ * Name: imxrt_backlight
+ *
+ * Description:
+ *   If CONFIG_IMXRT_LCD_BACKLIGHT is defined, then the board-specific
+ *   logic must provide this interface to turn the backlight on and off.
+ *
  ****************************************************************************/
 
-uint8_t esp32_spi3_status(FAR struct spi_dev_s *dev, uint32_t devid)
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+void imxrt_backlight(bool blon)
 {
-  uint8_t status = 0;
-
-  return status;
+  imxrt_gpio_write(GPIO_LCD_BL, blon); /* High illuminates */
 }
+#endif
+
+/****************************************************************************
+ * Name: imxrt_lcd_initialize
+ *
+ * Description:
+ *   Initialization of the LCD blackligt and pin for the imxrt_bringup().
+ *
+ ****************************************************************************/
+
+void imxrt_lcd_initialize(void)
+{
+  /* Setup the backlight pin */
+
+  imxrt_lcd_pkl_pin_setup();
+
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+  /* Turn ON the backlight */
+
+  imxrt_backlight(true);
+#endif
+}
+
+#endif /* CONFIG_IMXRT_LCD */

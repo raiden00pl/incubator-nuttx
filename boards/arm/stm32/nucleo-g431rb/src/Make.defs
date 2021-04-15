@@ -37,7 +37,7 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifneq ($(CONFIG_BOARD_STM32_IHM07M1),y)
+ifneq ($(CONFIG_STM32_FOC),y)
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
@@ -49,6 +49,10 @@ endif
 
 ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
 CSRCS += stm32_foc_ihm07m1.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
+CSRCS += stm32_foc_ihm16m1.c
 endif
 
 DEPPATH += --dep-path board

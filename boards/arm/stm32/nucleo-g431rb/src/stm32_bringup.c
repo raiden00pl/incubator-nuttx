@@ -103,7 +103,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_STM32_FOC
-  /* Initialize and register the FOC device */
+  /* Initialize and register the FOC device - must be before ADC setup */
 
   ret = stm32_foc_setup();
   if (ret < 0)
